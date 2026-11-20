@@ -45,7 +45,21 @@ public class OrderController {
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
-    @PatchMapping("/{id}/status")
+    @GetMapping("/{id}/status")
+    public ResponseEntity<Map<String, Object>> getStatus(@PathVariable Long id) {
+        return orderService.getById(id)
+                .map(order -> {
+                    Map<String, Object> res = Map.of(
+                            "id", (Object) order.getId(),
+                            "orderCode", order.getOrderCode(),
+                            "status", order.getStatus()
+                    );
+                    return ResponseEntity.ok(res);
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @RequestMapping(value = "/{id}/status", method = {RequestMethod.PATCH, RequestMethod.PUT})
     public ResponseEntity<Order> updateStatus(@PathVariable Long id, @RequestBody Map<String, String> payload) {
         String status = payload.get("status");
         if (status == null || status.isBlank()) {
